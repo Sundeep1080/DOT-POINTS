@@ -4189,6 +4189,27 @@ function buildSignalAnalytics() {
     </tr>`;
   }).join('');
 
+  // ── Table 2: By Band Zone ──
+  const zoneRows = ZONE_ORDER.map(k => {
+    const d = byZone[k];
+    const resolved = d.wins + d.losses;
+    const barW = resolved > 0 ? Math.round(d.wins / resolved * 100) : 0;
+    const label = ZONE_LABELS[k] || k;
+    return `<tr>
+      <td><span class="sa-sig-lbl">${label}</span></td>
+      <td class="sa-wins">${d.wins}</td>
+      <td class="sa-losses">${d.losses}</td>
+      <td class="sa-early">${d.early}</td>
+      <td>
+        <div class="sa-bar-wrap">
+          <div class="sa-bar"><div class="sa-bar-fill" style="width:${barW}%;background:${barColour(d.wins,d.losses)}"></div></div>
+          ${wrBadge(d.wins, d.losses)}
+        </div>
+      </td>
+      <td class="sa-n">${d.total}</td>
+    </tr>`;
+  }).join('');
+
   const mkCollapsible = (id, icon, title, tableHtml, noteHtml) => `
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
       <div onclick="(function(el){
