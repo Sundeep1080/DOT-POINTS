@@ -1,0 +1,27 @@
+{
+  "name": "IRAVAT · SALT Signal Engine",
+  "short_name": "IRAVAT",
+  "description": "NSE Stock Signal Scanner & Portfolio Engine — Medallion Edition",
+  "start_url": "/DOT-POINTS/iravat_v9.html",
+  "scope": "/DOT-POINTS/",
+  "display": "standalone",
+  "background_color": "#f5f6fa",
+  "theme_color": "#d97706",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "/DOT-POINTS/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/DOT-POINTS/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "productivity"],
+  "lang": "en-IN"
+}
