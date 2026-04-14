@@ -2139,7 +2139,7 @@ body::before {
   align-items: center;
 }
 .pf-dot {
-  width: 28px; height: 28px;
+  width: 36px; height: 36px;
   border-radius: 50%;
   display: grid; place-items: center;
   font-family: var(--mono);
@@ -2149,6 +2149,7 @@ body::before {
   color: var(--text3);
   background: var(--bg3);
   position: relative;
+  flex-shrink: 0;
 }
 .pf-dot.d-win  { background: rgba(5,150,105,0.12);  border-color: var(--bull); color: var(--bull); }
 .pf-dot.d-loss { background: rgba(220,38,38,0.10);  border-color: var(--bear); color: var(--bear); }
@@ -2160,13 +2161,14 @@ body::before {
 .pf-stocks {
   padding: 6px 0 2px;
 }
+/* Stock row — 9 columns with proper spacing */
 .pf-stock-row {
   display: grid;
-  grid-template-columns: 90px 55px 60px 45px 60px 65px 70px auto;
+  grid-template-columns: 100px 60px 55px 110px 55px 60px 60px 100px auto;
   align-items: center;
-  padding: 5px 14px;
+  padding: 7px 16px;
   border-bottom: 1px solid var(--border);
-  gap: 4px;
+  gap: 8px;
   font-family: var(--mono);
   font-size: 11px;
   transition: background 0.12s;
@@ -2179,7 +2181,7 @@ body::before {
   text-transform: uppercase;
   letter-spacing: 0.8px;
   font-weight: 700;
-  padding-bottom: 4px;
+  padding: 6px 16px 6px;
   border-bottom: 2px solid var(--border2);
   background: var(--bg3);
 }
@@ -2191,6 +2193,23 @@ body::before {
 .psr-ret-pos { color: var(--bull); font-weight: 700; }
 .psr-ret-neg { color: var(--bear); font-weight: 700; }
 .psr-ret-neu { color: var(--wait); }
+/* Entry / Exit price column */
+.psr-entry { font-size: 10px; color: var(--text2); line-height: 1.5; }
+.psr-entry-lbl { font-size: 8px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Conviction tier colors */
+.conv-strong  { background:rgba(220,38,38,0.12);  color:#b91c1c; border:1px solid rgba(220,38,38,0.35);  font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;white-space:nowrap; }
+.conv-high    { background:rgba(234,88,12,0.11);  color:#c2410c; border:1px solid rgba(234,88,12,0.35);  font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;white-space:nowrap; }
+.conv-watch   { background:rgba(129,140,248,0.12);color:#4338ca; border:1px solid rgba(129,140,248,0.35);font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;white-space:nowrap; }
+.conv-moderate{ background:rgba(217,119,6,0.10);  color:#92400e; border:1px solid rgba(217,119,6,0.35);  font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;white-space:nowrap; }
+.conv-low     { background:rgba(107,114,128,0.08);color:#4b5563; border:1px solid rgba(107,114,128,0.3); font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;white-space:nowrap; }
+
+/* Day dots — larger with proper spacing */
+.pf-day-track {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
 
 /* Stock status badge */
 .psr-status {
@@ -2540,6 +2559,88 @@ body::before {
   padding: 4px;
   flex-shrink: 0;
 }
+
+/* ═══════════════════════════════════════════════════════
+   DARK MODE
+═══════════════════════════════════════════════════════ */
+body.dark-mode {
+  --bg:       #0f1117;
+  --bg2:      #1a1d27;
+  --bg3:      #22263a;
+  --border:   #2d3248;
+  --border2:  #3a3f5c;
+  --text:     #c8cde4;
+  --text2:    #8892b0;
+  --text3:    #4a5270;
+  --bright:   #e8ecf8;
+  --amber:    #f59e0b;
+  --amber-d:  #d97706;
+  --amber-g:  rgba(245,158,11,0.10);
+  --bull:     #10b981;
+  --bull-d:   #059669;
+  --bull-g:   rgba(16,185,129,0.10);
+  --bear:     #f87171;
+  --bear-d:   #dc2626;
+  --bear-g:   rgba(248,113,113,0.10);
+  --exit:     #fb923c;
+  --exit-g:   rgba(251,146,60,0.10);
+  --wait:     #6b7699;
+}
+body.dark-mode { background-image:
+    radial-gradient(circle at 15% 10%, rgba(245,158,11,0.05) 0%, transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(16,185,129,0.04) 0%, transparent 40%); }
+body.dark-mode::before {
+  background-image: radial-gradient(circle, rgba(200,205,228,0.04) 1px, transparent 1px); }
+body.dark-mode .signals-table tbody tr:hover { background: rgba(200,205,228,0.03); }
+body.dark-mode .pf-stock-row:hover { background: rgba(245,158,11,0.05); }
+body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
+  background: var(--bg3) !important; color: var(--bright) !important; }
+
+/* Theme toggle button */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text2);
+  transition: all 0.2s;
+  user-select: none;
+  flex-shrink: 0;
+}
+.theme-toggle:hover { border-color: var(--amber); color: var(--amber); }
+.theme-toggle-track {
+  width: 32px; height: 16px;
+  background: var(--border2);
+  border-radius: 8px;
+  position: relative;
+  transition: background 0.2s;
+}
+.dark-mode .theme-toggle-track { background: var(--amber); }
+.theme-toggle-knob {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.2s;
+}
+.dark-mode .theme-toggle-knob { left: 18px; }
+
+
+/* Top 3 portfolio card demarcation */
+.pf-card-gold   { border:2px solid #d97706 !important; box-shadow:0 0 16px rgba(217,119,6,0.20) !important; }
+.pf-card-silver { border:2px solid #9ca3af !important; box-shadow:0 0 12px rgba(156,163,175,0.15) !important; }
+.pf-card-bronze { border:2px solid #ea580c !important; box-shadow:0 0 12px rgba(234,88,12,0.15) !important; }
+.pf-card-gold   .pf-header { background:linear-gradient(135deg,rgba(217,119,6,0.12),rgba(217,119,6,0.04)); }
+.pf-card-silver .pf-header { background:linear-gradient(135deg,rgba(156,163,175,0.10),rgba(156,163,175,0.03)); }
+.pf-card-bronze .pf-header { background:linear-gradient(135deg,rgba(234,88,12,0.10),rgba(234,88,12,0.03)); }
 </style>
 </head>
 <body>
@@ -2563,6 +2664,10 @@ body::before {
       <span class="pill pill-green">SCORE · FRESHNESS · WEEKLY</span>
       <span class="pill pill-dim">750 STOCKS</span>
       <span class="pill pill-dim">NSE / BSE</span>
+    </div>
+    <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+      <span id="themeLabel">☀️ Light</span>
+      <div class="theme-toggle-track"><div class="theme-toggle-knob"></div></div>
     </div>
   </div>
 
@@ -5692,6 +5797,29 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('sampleBtn').addEventListener('click', loadSampleData);
   toast('Select a CSV file or paste CSV text, then click Generate Signals', 'info');
 });
+
+/* ═══════════════════════════════════════════════════════
+   DARK / LIGHT THEME TOGGLE
+═══════════════════════════════════════════════════════ */
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark-mode');
+  localStorage.setItem('iravat_theme', isDark ? 'dark' : 'light');
+  const lbl = document.getElementById('themeLabel');
+  if (lbl) lbl.textContent = isDark ? '🌙 Dark' : '☀️ Light';
+}
+
+// Apply saved theme on load
+(function() {
+  const saved = localStorage.getItem('iravat_theme');
+  if (saved === 'dark') {
+    document.body.classList.add('dark-mode');
+    document.addEventListener('DOMContentLoaded', () => {
+      const lbl = document.getElementById('themeLabel');
+      if (lbl) lbl.textContent = '🌙 Dark';
+    });
+  }
+})();
+
 </script>
 
 <!-- ── Signal History Modal ── -->
@@ -5800,20 +5928,9 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
-    <!-- Sector strength strip -->
-    <div id="peSectorStrip" style="display:none;background:var(--bg2);border:1px solid var(--border);
-         border-radius:var(--radius);padding:10px 14px;box-shadow:var(--shadow-sm);">
-      <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--text2);
-                  letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">
-        <i class="fas fa-fire" style="color:var(--amber);margin-right:5px;"></i>
-        Sector Strength Ranking — Today's Top Hunting Grounds
-      </div>
-      <div class="sec-strength-bar" id="peSectorBars"></div>
-    </div>
-
-    <!-- Regime Warning Banner -->
-    <div id="peRegimeBanner" style="display:none;padding:10px 16px;border-radius:var(--radius);
-         font-family:var(--mono);font-size:11px;border:1px solid;margin-bottom:2px;"></div>
+    <!-- Regime Warning Banner (compact, portfolio-only context) -->
+    <div id="peRegimeBanner" style="display:none;padding:8px 14px;border-radius:var(--radius);
+         font-family:var(--mono);font-size:11px;border:1px solid;"></div>
 
     <!-- Portfolio cards grid -->
     <div class="pe-grid" id="peGrid">
@@ -6544,8 +6661,6 @@ function renderPortfolioPage() {
     else { schedEl.textContent=`Next: ${getNextGenerationDay()}`; schedEl.style.color='var(--text3)'; }
   }
 
-  renderSectorStrip();
-
   // Regime banner
   const banner = document.getElementById('peRegimeBanner');
   if (banner) {
@@ -6691,22 +6806,32 @@ function renderPfCard(pf, medal='', isTop3=false, convScore=0) {
   const rows=pf.stocks.map(st=>{
     const r=((st.currentPrice-st.entryPrice)/st.entryPrice*100).toFixed(1);
     const rc=r>0?'psr-ret-pos':r<0?'psr-ret-neg':'psr-ret-neu';
-    const sc={tp:'ss-tp',sl:'ss-sl',open:'ss-open',near_tp:'ss-near-tp',near_sl:'ss-near-sl'}[st.status]||'ss-open';
-    const sl2={tp:'✓ TP HIT',sl:'✗ SL HIT',open:'◉ Open',near_tp:'↑ Near TP',near_sl:'↓ Near SL'}[st.status]||'◉ Open';
+    const stsCls={tp:'ss-tp',sl:'ss-sl',open:'ss-open',near_tp:'ss-near-tp',near_sl:'ss-near-sl'}[st.status]||'ss-open';
+    const stsLbl={tp:'✓ TP HIT',sl:'✗ SL HIT',open:'◉ Open',near_tp:'↑ Near TP',near_sl:'↓ Near SL'}[st.status]||'◉ Open';
     const zs={rej_lo:'REJ↓',below_va:'BelVA',va:'InVA',above_va:'AbvVA',rej_hi:'REJ↑'}[st.zone]||st.zone;
     const sigCol = pf.isAnticipatory ? '#818cf8' : st.signal.startsWith('B')?'var(--bull)':'var(--bear)';
-    // Conviction badge
-    const convBadge = st.convLabel
-      ? `<span style="font-family:var(--mono);font-size:9px;font-weight:700;padding:1px 5px;
-              border-radius:6px;background:${st.convBg||'var(--bg3)'};
-              color:${st.convColor||'var(--text2)'};border:1px solid ${st.convColor?st.convColor+'44':'var(--border)'};
-              white-space:nowrap">${st.convLabel}</span>`
-      : '';
-    const anticExtra = pf.isAnticipatory
-      ? `<span style="font-size:9px;color:var(--text3);font-family:var(--mono)">` +
-        (st.hmaGap!==null ? `Gap:${st.hmaGap}%` : '') +
-        (st.smiVal!==null ? ` SMI:${st.smiVal}` : '') + `</span>`
+
+    // Conviction CSS class
+    const convTier = st.conviction||'low';
+    const convCls = convTier==='strong'?'conv-strong':convTier==='high'?'conv-high':convTier==='moderate'?'conv-moderate':convTier.includes('watch')||pf.isAnticipatory?'conv-watch':'conv-low';
+    const convLabel = st.convLabel||('⚪ '+(convTier.toUpperCase()));
+    const convBadge = `<span class="${convCls}">${convLabel}</span>`;
+
+    // Entry & Exit price column
+    const exitPrice = st.status==='tp' ? st.tp : st.status==='sl' ? st.sl : st.currentPrice;
+    const exitLabel = st.status==='tp' ? 'TP' : st.status==='sl' ? 'SL' : 'CMP';
+    const exitCol = pf.isAnticipatory
+      ? `<div class="psr-entry"><span class="psr-entry-lbl">HMA GAP</span><br>${st.hmaGap!==null?st.hmaGap+'%':'—'}</div>`
+      : `<div class="psr-entry">
+          <span class="psr-entry-lbl">ENTRY</span> ₹${st.entryPrice}<br>
+          <span class="psr-entry-lbl">${exitLabel}</span>
+          <span style="color:${st.status==='tp'?'var(--bull)':st.status==='sl'?'var(--bear)':'var(--text2)'}">₹${exitPrice}</span>
+        </div>`;
+
+    const winInfo = pf.isAnticipatory
+      ? `<span style="font-size:9px;color:var(--text3);font-family:var(--mono)">SMI:${st.smiVal||'—'}</span>`
       : `<span style="font-size:10px;color:var(--text2)">WR${st.winRate}%</span>`;
+
     return `<div class="pf-stock-row">
       <span class="psr-sym">${st.symbol}</span>
       <span class="psr-sig" style="color:${sigCol}">${st.signal}</span>
@@ -6714,13 +6839,14 @@ function renderPfCard(pf, medal='', isTop3=false, convScore=0) {
       ${convBadge}
       <span class="psr-size">₹${(st.kellySize/1000).toFixed(0)}k</span>
       <span class="${rc}">${r>0?'+':''}${r}%</span>
-      ${anticExtra}
-      <span class="psr-status ${sc}">${sl2}</span>
+      ${winInfo}
+      ${exitCol}
+      <span class="psr-status ${stsCls}">${stsLbl}</span>
     </div>`;
   }).join('');
 
-  const topBorder = medal==='🥇'?'4px solid #d97706':medal==='🥈'?'4px solid #9ca3af':medal==='🥉'?'4px solid #ea580c':'';
-  return `<div class="${cardCls}" style="${topBorder?'border-top:'+topBorder:''}">
+  const medalClass = medal==='🥇'?' pf-card-gold':medal==='🥈'?' pf-card-silver':medal==='🥉'?' pf-card-bronze':'';
+  return `<div class="${cardCls}${medalClass}">
     <div class="pf-header">
       <div class="pf-theme">
         <div class="pf-theme-icon" style="background:${pf.themeIconBg};color:${pf.themeIconCol}"><i class="${pf.themeIcon}"></i></div>
@@ -6762,7 +6888,7 @@ function renderPfCard(pf, medal='', isTop3=false, convScore=0) {
     </div>
     <div class="pf-stocks">
       <div class="pf-stock-row psr-header">
-        <span>Symbol</span><span>Signal</span><span>Zone</span><span>Score</span><span>Size</span><span>Return</span><span>Win%</span><span>Status</span>
+        <span>Symbol</span><span>Signal</span><span>Zone</span><span>Conviction</span><span>Size</span><span>Return</span><span>Win%</span><span>Entry / Exit</span><span>Status</span>
       </div>
       ${rows}
     </div>
