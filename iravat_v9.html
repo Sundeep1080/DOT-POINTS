@@ -2033,7 +2033,7 @@ body::before {
 /* Portfolio grid */
 .pe-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
 
@@ -2363,7 +2363,7 @@ body::before {
 .ssb-rank { font-family: var(--mono); font-size: 8px; color: var(--text3); margin-top: 1px; }
 
 @media (max-width: 900px) {
-  .pe-grid { grid-template-columns: 1fr; }
+  .pe-grid { grid-template-columns: 1fr; } /* single col on mobile */
   .arc-grid { grid-template-columns: 1fr; }
   .pf-stock-row { grid-template-columns: 80px 50px 55px 40px 55px 60px 65px auto; font-size: 10px; }
 }
@@ -5952,7 +5952,7 @@ const PE_THEMES = [
   { id:'P01', name:'B1-OS + B2 ELITE',
     icon:'fas fa-star', iconBg:'rgba(220,38,38,0.15)', iconCol:'#dc2626',
     desc:'ONLY B1-OS + B2 — highest edge oversold+crossover. No B3 ever.',
-    maxStocks:8, minStocks:3,
+    maxStocks:8, minStocks:1,
     filter:(s)=>s.type==='buy'&&(s.signal==='B1-OS'||s.signal==='B2'),
     sort:(a,b)=>{ const r={'B1-OS':2,'B2':1}; const ar=r[a.signal]||0,br=r[b.signal]||0; return br!==ar?br-ar:b.score-a.score; }},
 
@@ -6126,11 +6126,15 @@ function portfolioConvictionScore(stocks) {
   },0) / stocks.length * 25; // 0-100 scale
 }
 
-function buildPortfolio(theme, minScore, capitalPerPf, sectorRanking) {
-  // Anticipatory portfolios use all WAIT signals regardless of minScore
+function buildPortfolio(theme, minScore, capitalPerPf, sectorRanking, stockUsageCount) {
+  stockUsageCount = stockUsageCount || {};
+  const MAX_REUSE = 2; // each stock can appear in at most 2 portfolios per batch
   const isAntic = theme.isAnticipatory || false;
 
-  let candidates = allSignals.filter(s => theme.filter(s));
+  // Filter candidates — enforce global stock cap
+  let candidates = allSignals.filter(s =>
+    theme.filter(s) && (stockUsageCount[s.symbol]||0) < MAX_REUSE
+  );
   if (!candidates.length) return null;
 
   if (theme.sort) candidates.sort(theme.sort);
@@ -6336,6 +6340,9 @@ function _doGenerate(minScore, capitalPF, silent) {
     toast('⚠️ BEAR REGIME: Kelly reduced to 25%. Only highest conviction trades.', 'warn');
   }
 
+  // Global stock usage counter — max 2 portfolios per stock
+  const stockUsageCount = {};
+
   let built=0, skipped=[];
   PE_THEMES.forEach(theme=>{
     const exists = pePortfolios.find(p=>
@@ -6346,8 +6353,15 @@ function _doGenerate(minScore, capitalPF, silent) {
     pePortfolios = pePortfolios.filter(p=>
       !(p.themeId===theme.id && p.generatedDate===today && (!p.stocks||p.stocks.length===0))
     );
-    const pf = buildPortfolio(theme, minScore, adjCapital, sectorRank);
-    if (pf) { pf.regime=regime.status; pf.regimeKelly=regime.kelly; pePortfolios.push(pf); built++; }
+    const pf = buildPortfolio(theme, minScore, adjCapital, sectorRank, stockUsageCount);
+    if (pf) {
+      // Record stock usage
+      pf.stocks.forEach(s => {
+        stockUsageCount[s.symbol] = (stockUsageCount[s.symbol]||0) + 1;
+      });
+      pf.regime=regime.status; pf.regimeKelly=regime.kelly;
+      pePortfolios.push(pf); built++;
+    }
     else skipped.push(theme.name);
   });
   if (built>0) { peSave(); updateTabBadges(); }
