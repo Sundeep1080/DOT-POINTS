@@ -1945,8 +1945,20 @@ body::before {
 .page-divider { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
 
 /* Page sections */
-.page-section { display: none; }
-.page-section.active { display: block; }
+.page-section {
+  display: none;
+  visibility: hidden;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.page-section.active {
+  display: block;
+  visibility: visible;
+  height: auto;
+  overflow: visible;
+  pointer-events: auto;
+}
 
 /* ═══════════════════════════════════════════════════════
    PORTFOLIO ENGINE — PAGE 2
