@@ -7310,8 +7310,7 @@ setInterval(updatePortfolioGenButton,60000);
    Uses CORS proxy for browser-side API calls
 ═══════════════════════════════════════════════════════ */
 
-const ZD_BASE = 'https://api.kite.trade';
-const ZD_CORS = 'https://corsproxy.io/?';
+const ZD_WORKER = 'https://jade-kite.sundeep1080.workers.dev';
 let zdApiKey   = '';
 let zdToken    = '';
 let zdLiveMode = false;
@@ -7362,8 +7361,7 @@ async function zdFetchPrices(symbolList) {
   for(let i=0;i<symbolList.length;i+=500) chunks.push(symbolList.slice(i,i+500));
   for(const chunk of chunks){
     const params=chunk.map(s=>`i=${encodeURIComponent(s)}`).join('&');
-    const target=`${ZD_BASE}/quote/ltp?${params}`;
-    const url=`${ZD_CORS}${encodeURIComponent(target)}`;
+    const url=`${ZD_WORKER}/kite/quote/ltp?${params}`;
     try{
       const res=await fetch(url,{headers:{'X-Kite-Version':'3','Authorization':`token ${zdApiKey}:${zdToken}`}});
       if(!res.ok){
