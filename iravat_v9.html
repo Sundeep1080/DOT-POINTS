@@ -2653,6 +2653,98 @@ body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
 .pf-card-gold   .pf-header { background:linear-gradient(135deg,rgba(217,119,6,0.12),rgba(217,119,6,0.04)); }
 .pf-card-silver .pf-header { background:linear-gradient(135deg,rgba(156,163,175,0.10),rgba(156,163,175,0.03)); }
 .pf-card-bronze .pf-header { background:linear-gradient(135deg,rgba(234,88,12,0.10),rgba(234,88,12,0.03)); }
+
+/* ═══════════════════════════════════════════════════════
+   ZERODHA LIVE CMP ENGINE
+═══════════════════════════════════════════════════════ */
+.zd-panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-left: 4px solid #6366f1;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-family: var(--mono);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-sm);
+}
+.zd-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--bright);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.zd-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--text3);
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+.zd-dot.live    { background: var(--bull); box-shadow: 0 0 6px rgba(5,150,105,0.6); animation: pulse 2s infinite; }
+.zd-dot.error   { background: var(--bear); }
+.zd-dot.fetching{ background: var(--amber); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.zd-input-grp {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.zd-input {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg3);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--bright);
+  outline: none;
+  width: 120px;
+}
+.zd-input:focus { border-color: #6366f1; }
+.zd-input-lbl { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
+.zd-status {
+  font-size: 10px;
+  color: var(--text3);
+  flex: 1;
+  min-width: 200px;
+}
+.zd-status.ok    { color: var(--bull); }
+.zd-status.err   { color: var(--bear); }
+.zd-status.fetch { color: var(--amber); }
+.zd-auto-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 8px;
+  background: rgba(99,102,241,0.10);
+  color: #6366f1;
+  border: 1px solid rgba(99,102,241,0.3);
+  white-space: nowrap;
+}
+/* Live price indicator in signal table */
+.cmp-live {
+  font-weight: 700;
+  color: var(--bright);
+  position: relative;
+}
+.cmp-live::after {
+  content: '●';
+  font-size: 6px;
+  color: var(--bull);
+  position: absolute;
+  top: -2px;
+  right: -8px;
+}
+/* Live P&L color in portfolio */
+.live-pnl-pos { color: var(--bull) !important; font-weight:700; }
+.live-pnl-neg { color: var(--bear) !important; font-weight:700; }
+
 </style>
 </head>
 <body>
@@ -3200,6 +3292,37 @@ body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
         <div style="font-family:var(--mono);font-size:11px;color:var(--text3);padding:10px;">Run scan to populate analytics.</div>
       </div>
     </div>
+  </div>
+
+  <!-- ── ZERODHA LIVE CMP PANEL ── -->
+  <div class="zd-panel" id="zdPanel">
+    <div class="zd-title">
+      <div class="zd-dot" id="zdDot"></div>
+      <i class="fas fa-chart-line" style="color:#6366f1"></i>
+      LIVE CMP
+    </div>
+    <div class="zd-input-grp">
+      <span class="zd-input-lbl">API Key</span>
+      <input type="text" class="zd-input" id="zdApiKey" placeholder="Your API key" autocomplete="off">
+    </div>
+    <div class="zd-input-grp">
+      <span class="zd-input-lbl">Access Token</span>
+      <input type="password" class="zd-input" id="zdToken" placeholder="Daily token" autocomplete="off" style="width:180px;">
+    </div>
+    <button class="btn btn-primary" onclick="zdConnect()" id="zdConnectBtn"
+            style="padding:5px 14px;font-size:11px;background:#6366f1;border-color:#6366f1;">
+      <i class="fas fa-plug"></i> Connect
+    </button>
+    <button class="btn btn-ghost" onclick="zdFetchNow()" id="zdFetchBtn" disabled
+            style="padding:5px 12px;font-size:11px;">
+      <i class="fas fa-rotate"></i> Refresh Now
+    </button>
+    <label style="display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:var(--text2);cursor:pointer;">
+      <input type="checkbox" id="zdAutoRefresh" onchange="zdToggleAuto()" style="cursor:pointer;">
+      Auto 30s
+    </label>
+    <div class="zd-status" id="zdStatus">Enter API key and daily access token to enable live prices</div>
+    <span class="zd-auto-badge" id="zdAutoLabel" style="display:none">⚡ LIVE</span>
   </div>
 
   <!-- ── FILTER BAR ── -->
@@ -5520,7 +5643,7 @@ function renderTable(signals) {
       <td style="text-align:center;min-width:120px">${actionCell}</td>
       <td class="idx-cell">${s.index}</td>
       <td><span class="sec-tag" title="${s.sector}">${s.sector}</span></td>
-      <td class="sym-cell">${
+      <td class="sym-cell" data-symbol="${s.symbol}">${
         s._searchTerm && s.symbol.includes(s._searchTerm)
           ? s.symbol.replace(s._searchTerm,
               `<mark style="background:rgba(217,119,6,0.25);color:var(--amber);
@@ -5553,7 +5676,7 @@ function renderTable(signals) {
         </div>
       </td>
       <td>${buildBandChart(s.bands)}</td>
-      <td class="price-cell">${fmtPrice(s.price)}</td>
+      <td class="price-cell" data-col="cmp" data-symbol="${s.symbol}">${fmtPrice(s.price)}</td>
       <td>${(() => {
         const r = s.returns100d;
         if (r === null || r === undefined) return '<span style="color:var(--text3)">—</span>';
@@ -7179,6 +7302,195 @@ function checkAutoGenerate() {
 
 // Tick every 60s to update countdown
 setInterval(updatePortfolioGenButton,60000);
+
+/* ═══════════════════════════════════════════════════════
+   ZERODHA KITE API — LIVE CMP ENGINE
+   Option A: Manual access token entry each morning
+   Stored in sessionStorage only (cleared on tab close)
+   Uses CORS proxy for browser-side API calls
+═══════════════════════════════════════════════════════ */
+
+const ZD_BASE = 'https://api.kite.trade';
+const ZD_CORS = 'https://corsproxy.io/?';
+let zdApiKey   = '';
+let zdToken    = '';
+let zdLiveMode = false;
+let zdInterval = null;
+let zdPrices   = {};
+
+// Restore saved credentials from sessionStorage on load
+(function zdRestore() {
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const k = sessionStorage.getItem('zd_api_key');
+    const t = sessionStorage.getItem('zd_token');
+    if (k && t) {
+      zdApiKey=k; zdToken=t;
+      const kEl=document.getElementById('zdApiKey');
+      const tEl=document.getElementById('zdToken');
+      if(kEl)kEl.value=k;
+      if(tEl)tEl.value=t;
+      zdSetStatus('Credentials restored · Click Connect to verify','fetch');
+    }
+  });
+})();
+
+function zdConnect() {
+  const kEl=document.getElementById('zdApiKey');
+  const tEl=document.getElementById('zdToken');
+  if(!kEl||!tEl) return;
+  zdApiKey=kEl.value.trim(); zdToken=tEl.value.trim();
+  if(!zdApiKey||!zdToken){ zdSetStatus('Enter both API key and access token','err'); return; }
+  sessionStorage.setItem('zd_api_key',zdApiKey);
+  sessionStorage.setItem('zd_token',zdToken);
+  zdSetStatus('Testing connection...','fetch'); zdSetDot('fetching');
+  zdFetchPrices(['NSE:RELIANCE']).then(r=>{
+    if(r.ok){
+      zdLiveMode=true;
+      zdSetStatus('✅ Connected · Click Refresh or enable Auto 30s','ok');
+      zdSetDot('live');
+      document.getElementById('zdFetchBtn').disabled=false;
+      toast('Zerodha connected — live prices enabled','ok');
+    } else {
+      zdSetStatus('❌ '+(r.error||'Auth failed — check API key and token'),'err');
+      zdSetDot('error'); zdLiveMode=false;
+    }
+  });
+}
+
+async function zdFetchPrices(symbolList) {
+  const chunks=[];
+  for(let i=0;i<symbolList.length;i+=500) chunks.push(symbolList.slice(i,i+500));
+  for(const chunk of chunks){
+    const params=chunk.map(s=>`i=${encodeURIComponent(s)}`).join('&');
+    const target=`${ZD_BASE}/quote/ltp?${params}`;
+    const url=`${ZD_CORS}${encodeURIComponent(target)}`;
+    try{
+      const res=await fetch(url,{headers:{'X-Kite-Version':'3','Authorization':`token ${zdApiKey}:${zdToken}`}});
+      if(!res.ok){
+        const e=await res.json().catch(()=>({}));
+        return {ok:false,error:e.message||`HTTP ${res.status}`};
+      }
+      const data=await res.json();
+      if(data.data){
+        Object.entries(data.data).forEach(([key,val])=>{
+          const sym=key.split(':')[1];
+          if(sym&&val.last_price!=null) zdPrices[sym]=val.last_price;
+        });
+      }
+    } catch(e){ return {ok:false,error:e.message}; }
+  }
+  return {ok:true};
+}
+
+function zdBuildSymbolList() {
+  const syms=new Set();
+  if(allSignals&&allSignals.length) allSignals.forEach(s=>{ if(s.symbol) syms.add('NSE:'+s.symbol); });
+  pePortfolios.filter(p=>p.status==='active').forEach(pf=>{ pf.stocks.forEach(st=>syms.add('NSE:'+st.symbol)); });
+  return [...syms];
+}
+
+function zdFetchAll() {
+  if(!zdLiveMode) return;
+  const syms=zdBuildSymbolList();
+  if(!syms.length){ zdSetStatus('No stocks loaded — run Signal Scanner first','fetch'); return; }
+  zdSetStatus(`Fetching ${syms.length} symbols...`,'fetch'); zdSetDot('fetching');
+  zdFetchPrices(syms).then(r=>{
+    if(r.ok){
+      const ts=new Date().toLocaleTimeString('en-IN');
+      zdSetStatus(`✅ ${Object.keys(zdPrices).length} prices live · ${ts}`,'ok'); zdSetDot('live');
+      zdUpdateSignalTable(); zdUpdatePortfolios();
+    } else {
+      zdSetStatus('❌ '+(r.error||'Fetch failed'),'err'); zdSetDot('error');
+      if(r.error&&r.error.includes('401')){ zdLiveMode=false; toast('Token expired — enter new access token','warn'); }
+    }
+  });
+}
+
+function zdFetchNow(){ zdFetchAll(); }
+
+function zdToggleAuto(){
+  const cb=document.getElementById('zdAutoRefresh');
+  const badge=document.getElementById('zdAutoLabel');
+  if(cb&&cb.checked){
+    if(!zdLiveMode){ if(cb)cb.checked=false; toast('Connect first','warn'); return; }
+    zdInterval=setInterval(zdFetchAll,30000);
+    if(badge)badge.style.display='inline';
+    zdFetchAll();
+  } else {
+    if(zdInterval){clearInterval(zdInterval);zdInterval=null;}
+    if(badge)badge.style.display='none';
+  }
+}
+
+function zdSetStatus(msg,type){
+  const el=document.getElementById('zdStatus');
+  if(el){el.textContent=msg;el.className='zd-status'+(type?' '+type:'');}
+}
+function zdSetDot(state){
+  const el=document.getElementById('zdDot');
+  if(el)el.className='zd-dot '+state;
+}
+
+function zdUpdateSignalTable(){
+  if(!Object.keys(zdPrices).length) return;
+  document.querySelectorAll('#sigTable tbody tr').forEach(row=>{
+    const symEl=row.querySelector('[data-symbol]');
+    const cmpEl=row.querySelector('[data-col="cmp"]');
+    if(!symEl||!cmpEl) return;
+    const sym=symEl.getAttribute('data-symbol');
+    if(sym&&zdPrices[sym]!=null){
+      const lp=zdPrices[sym];
+      const orig=parseFloat(cmpEl.getAttribute('data-orig')||cmpEl.textContent.replace(/[^\d.]/g,''));
+      if(!cmpEl.getAttribute('data-orig')) cmpEl.setAttribute('data-orig',orig);
+      cmpEl.textContent='₹'+lp.toFixed(2);
+      cmpEl.classList.add('cmp-live');
+      const diff=lp-orig;
+      if(Math.abs(diff)>0.01){
+        cmpEl.style.color=diff>0?'var(--bull)':'var(--bear)';
+        setTimeout(()=>cmpEl.style.color='',2000);
+      }
+    }
+  });
+}
+
+function zdUpdatePortfolios(){
+  if(!Object.keys(zdPrices).length) return;
+  let updated=false;
+  pePortfolios.filter(p=>p.status==='active').forEach(pf=>{
+    pf.stocks.forEach(st=>{
+      const lp=zdPrices[st.symbol];
+      if(lp!=null){
+        st.currentPrice=lp;
+        if(st.status==='open'||st.status==='near_tp'||st.status==='near_sl'){
+          const ret=(lp-st.entryPrice)/st.entryPrice*100;
+          if(lp>=st.tp)     st.status='near_tp';
+          else if(lp<=st.sl)st.status='near_sl';
+          else st.status=ret>=1.2?'near_tp':ret<=-2.5?'near_sl':'open';
+        }
+        updated=true;
+      }
+    });
+  });
+  if(updated){
+    const p2=document.getElementById('page-p2');
+    if(p2&&p2.classList.contains('active')) renderPortfolioPage();
+  }
+}
+
+// Stop auto-refresh after market close (3:30pm IST)
+function zdMarketCloseCheck(){
+  if(!zdInterval) return;
+  const ist=getIST();
+  if(ist.getUTCHours()>15||(ist.getUTCHours()===15&&ist.getUTCMinutes()>=30)){
+    clearInterval(zdInterval); zdInterval=null;
+    const cb=document.getElementById('zdAutoRefresh');
+    const badge=document.getElementById('zdAutoLabel');
+    if(cb)cb.checked=false; if(badge)badge.style.display='none';
+    zdSetStatus('Market closed 3:30pm — auto-refresh stopped','ok'); zdSetDot('');
+    toast('Market closed — live prices paused','info');
+  }
+}
+setInterval(zdMarketCloseCheck,60000);
 
 function updateTabBadges() {
   const a=pePortfolios.filter(p=>p.status==='active').length;
